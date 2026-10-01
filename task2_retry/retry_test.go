@@ -19,6 +19,16 @@ func TestDo_SucceedsOnFirstAttempt(t *testing.T) {
 	}
 }
 
+func TestDo_NilOperation(t *testing.T) {
+	_, err := Do(nil, 3, time.Millisecond)
+	if err == nil {
+		t.Fatal("expected an error for a nil operation, got nil")
+	}
+	if !errors.Is(err, ErrNilOperation) {
+		t.Errorf("expected error to be recognizable via errors.Is(err, ErrNilOperation), got: %v", err)
+	}
+}
+
 func TestDo_SucceedsAfterRetries(t *testing.T) {
 	op := NewFlakyOperation(2, "ok")
 

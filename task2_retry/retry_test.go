@@ -29,6 +29,20 @@ func TestDo_NilOperation(t *testing.T) {
 	}
 }
 
+func TestDo_InvalidMaxAttempts(t *testing.T) {
+	_, err := Do(NewFlakyOperation(0, "ok"), 0, time.Millisecond)
+	if !errors.Is(err, ErrInvalidMaxAttempts) {
+		t.Fatalf("expected ErrInvalidMaxAttempts, got %v", err)
+	}
+}
+
+func TestDo_NegativeBackoff(t *testing.T) {
+	_, err := Do(NewFlakyOperation(0, "ok"), 1, -time.Millisecond)
+	if !errors.Is(err, ErrInvalidBackoff) {
+		t.Fatalf("expected ErrInvalidBackoff, got %v", err)
+	}
+}
+
 func TestDo_SucceedsAfterRetries(t *testing.T) {
 	op := NewFlakyOperation(2, "ok")
 

@@ -31,6 +31,9 @@ type ValidationError struct {
 // невалідні поля, наприклад:
 // "registration invalid: fields email, password"
 func (e *ValidationError) Error() string {
+	if e == nil {
+		return "registration invalid"
+	}
 	// TODO: реалізуйте
 	return "registration invalid: fields " + strings.Join(e.Fields, ", ")
 }

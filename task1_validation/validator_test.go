@@ -146,6 +146,13 @@ func TestValidateRegistration_ErrorMessageIsReadable(t *testing.T) {
 	}
 }
 
+func TestValidationError_NilReceiver(t *testing.T) {
+	var validationErr *ValidationError
+	if got, want := validationErr.Error(), "registration invalid"; got != want {
+		t.Errorf("nil ValidationError.Error() = %q, want %q", got, want)
+	}
+}
+
 func containsField(fields []string, target string) bool {
 	for _, f := range fields {
 		if f == target {

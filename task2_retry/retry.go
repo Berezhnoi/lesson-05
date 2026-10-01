@@ -17,6 +17,12 @@ var ErrTemporary = errors.New("retry: temporary failure")
 // ErrNilOperation is returned when Do receives no operation to execute.
 var ErrNilOperation = errors.New("retry: nil operation")
 
+// ErrInvalidMaxAttempts indicates that Do was called with fewer than one attempt.
+var ErrInvalidMaxAttempts = errors.New("retry: max attempts must be >= 1")
+
+// ErrInvalidBackoff indicates that Do was called with a negative backoff.
+var ErrInvalidBackoff = errors.New("retry: backoff must not be negative")
+
 // Operation — довільна операція, що може повернути помилку.
 type Operation func() (string, error)
 
@@ -32,6 +38,7 @@ type Operation func() (string, error)
 // Вимоги:
 //   - maxAttempts має бути >= 1; якщо операція вдається одразу — повторів немає
 //   - між спробами (окрім останньої) чекайте backoff перед наступною спробою
+//   - backoff не може бути від'ємним
 //   - якщо помилка НЕ є errors.Is(err, ErrTemporary) — не повторюйте спробу,
 //     одразу поверніть обгорнуту помилку
 //   - якщо всі спроби вичерпано — поверніть обгорнуту фінальну помилку,
@@ -41,7 +48,10 @@ func Do(op Operation, maxAttempts int, backoff time.Duration) (string, error) {
 		return "", ErrNilOperation
 	}
 	if maxAttempts < 1 {
-		return "", fmt.Errorf("maxAttempts must be >= 1, got %d", maxAttempts)
+		return "", fmt.Errorf("maxAttempts=%d: %w", maxAttempts, ErrInvalidMaxAttempts)
+	}
+	if backoff < 0 {
+		return "", fmt.Errorf("backoff=%s: %w", backoff, ErrInvalidBackoff)
 	}
 
 	var lastErr error
